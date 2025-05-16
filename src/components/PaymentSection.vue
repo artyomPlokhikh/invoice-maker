@@ -8,7 +8,7 @@
             </option>
         </select>
         <button @click="openAddPayment"
-                class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md">+ Přidat
+                class="px-3 py-2 text-sm bg-jade-600 text-white hover:bg-jade-700 rounded-md">+ Přidat
         </button>
     </div>
     <div v-if="invoice.paymentMethod" class="text-xs text-gray-500 mt-2 space-y-1">
@@ -16,7 +16,7 @@
         <div><span class="font-medium">IBAN:</span> {{ invoice.paymentMethod.iban }}</div>
         <div><span class="font-medium">SWIFT:</span> {{ invoice.paymentMethod.swift }}</div>
     </div>
-    <button @click="openEditPayment" class="text-sm text-blue-600 font-medium">
+    <button @click="openEditPayment" class="text-sm text-jade-600 font-medium">
         Upravit bankovní účet
     </button>
 

@@ -85,7 +85,7 @@
             </section>
 
 
-            <section class="mt-10 grid grid-cols-[auto_1fr] gap-x-6">
+            <section class="mt-6 grid grid-cols-[auto_1fr] gap-x-6">
                 <div class="w-8 flex items-center justify-center
                   text-jade-900 font-semibold text-xs tracking-widest
                   whitespace-nowrap rotate-180 [writing-mode:vertical-rl]">
@@ -93,22 +93,20 @@
                 </div>
 
                 <div>
-
+                    <p class="mb-6 text-sm">Fakturujeme Vám za dodané služby:</p>
                     <table class="w-full text-sm border-collapse">
                         <thead class="bg-gray-100">
                         <tr>
-                            <th class="border px-2 py-1 text-left">Označení dodávky</th>
-                            <th class="border px-2 py-1 text-right">Počet</th>
-                            <th class="border px-2 py-1 text-left">m.&nbsp;j.</th>
-                            <th class="border px-2 py-1 text-right">Cena&nbsp;za&nbsp;mj.</th>
+                            <th class="border px-2 py-1 text-left">Popis</th>
+                            <th class="border px-2 py-1 text-right">Čas</th>
+                            <th class="border px-2 py-1 text-right">Cena</th>
                             <th class="border px-2 py-1 text-right">Celkem</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr v-for="item in invoice.items" :key="item.id" class="even:bg-gray-50">
                             <td class="border px-2 py-1">{{ item.name }}</td>
-                            <td class="border px-2 py-1 text-right"> {{ formatNumber(item.quantity) }}</td>
-                            <td class="border px-2 py-1">{{ item.unit || 'h' }}</td>
+                            <td class="border px-2 py-1 text-right">{{ formatTimeValue(item.quantity) }}</td>
                             <td class="border px-2 py-1 text-right">{{ formatNumber(item.price) }}</td>
                             <td class="border px-2 py-1 text-right font-semibold">
                                 {{ formatItemTotal(item) }}
@@ -138,6 +136,7 @@ import { useInvoiceStore } from '@/stores/InvoiceStore.js';
 import QRCode from 'qrcode';
 import { generateQrPlatbaString } from '@/utils/paymentUtils.js';
 import { calculateItemTotal } from "@/utils/priceUtils.js";
+import { formatTimeValue } from "../utils/formatters.js";
 
 const invoice = ref(null);
 const qrCode = ref(null);

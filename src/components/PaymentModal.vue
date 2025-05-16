@@ -44,7 +44,7 @@
                 <button @click="emit('update:modelValue', false)" class="px-4 py-2 border border-gray-300 rounded-md">
                     Zrušit
                 </button>
-                <button @click="createPayment" class="px-4 py-2 bg-blue-600 text-white rounded-md">Přidat</button>
+                <button @click="createPayment" class="px-4 py-2 bg-jade-600 text-white rounded-md">Přidat</button>
             </div>
         </template>
     </ModalWindow>

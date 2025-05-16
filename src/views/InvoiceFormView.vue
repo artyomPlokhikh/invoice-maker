@@ -10,7 +10,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Popis</label>
             <textarea rows="3"
                       v-model="invoice.description"
-                      class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-y shadow-sm focus:outline-none focus:ring focus:ring-blue-200 min-h-[100px]"
+                      class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm resize-y shadow-sm focus:outline-none focus:ring focus:ring-jade-200 min-h-[100px]"
                       placeholder="Např. konzultace, vývoj, údržba..."
             ></textarea>
         </div>
@@ -40,7 +40,7 @@
         </div>
 
         <div class="flex justify-center">
-            <button @click="showAdditionalInfo = !showAdditionalInfo" class="text-sm text-blue-600 font-medium">
+            <button @click="showAdditionalInfo = !showAdditionalInfo" class="text-sm text-jade-600 font-medium">
                 {{ showAdditionalInfo ? 'Skrýt detaily' : 'Zobrazit více detailů' }}
             </button>
         </div>
@@ -79,10 +79,10 @@
         <div class="space-x-2">
             <button @click="cancel" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">Zrušit
             </button>
-            <button @click="saveAndGoToList" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <button @click="saveAndGoToList" class="px-4 py-2 bg-jade-600 text-white rounded-md hover:bg-jade-700">
                 {{ isEditing ? 'Uložit změny' : 'Uložit' }}
             </button>
-            <button @click="exportToPdf" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+            <button @click="exportToPdf" class="px-4 py-2 bg-jade-600 text-white rounded-md hover:bg-jade-700">
                 Exportovat do PDF
             </button>
         </div>
@@ -192,6 +192,7 @@ function cancel() {
         showDenyButton: true,
         showCancelButton: true,
         confirmButtonText: "Uložit",
+        confirmButtonColor: '#00bd7e', // jade-500
         denyButtonText: `Neukládat`
     }).then((result) => {
         if (result.isConfirmed) {
@@ -210,6 +211,7 @@ onBeforeRouteLeave((to, from, next) => {
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: "Uložit",
+            confirmButtonColor: '#00bd7e', // jade-500
             denyButtonText: `Neukládat`
         }).then((result) => {
             if (result.isConfirmed) {

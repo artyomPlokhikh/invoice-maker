@@ -2,7 +2,7 @@
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Faktury</h2>
         <button @click="goToInvoiceForm"
-                class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition text-sm shadow">
+                class="bg-jade-600 text-white px-4 py-2 rounded-xl hover:bg-jade-700 transition text-sm shadow">
             + Nová faktura
         </button>
     </div>
@@ -139,7 +139,7 @@ const deleteInvoice = (number) => {
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
+        cancelButtonColor: '#00bd7e', // jade-500
         cancelButtonText: "Zrušit",
         confirmButtonText: "Ano, smazat"
     }).then((result) => {

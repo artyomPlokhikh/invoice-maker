@@ -37,6 +37,7 @@
 import { computed, ref } from 'vue';
 import { calculateItemTotal, formatPrice } from "@/utils/priceUtils";
 import { useDraggableTable } from "@/composables/useDraggableTable.js";
+import { formatTimeValue } from "@/utils/formatters.js";
 
 const props = defineProps({
     item: {
@@ -55,7 +56,7 @@ const { draggedItemIndex, isDragTarget } = useDraggableTable(props);
 
 const rowClasses = computed(() => ({
     'hover:bg-gray-50': draggedItemIndex !== props.index,
-    'bg-blue-50': draggedItemIndex === props.index,
+    'bg-jade-50': draggedItemIndex === props.index,
     'animate-pulse bg-gray-100': isDragTarget === props.index
 }));
 
@@ -90,18 +91,6 @@ function parseTimeInput(input) {
     }
 
     return hours + (minutes / 60);
-}
-
-function formatTimeValue(value) {
-    if (!value && value !== 0) return '';
-
-    const numValue = parseFloat(value);
-    if (isNaN(numValue)) return '';
-
-    const hours = Math.floor(numValue);
-    const minutes = Math.round((numValue - hours) * 60);
-
-    return `${hours}h ${minutes}m`;
 }
 
 function formatTimeOnBlur() {

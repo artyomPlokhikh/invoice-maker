@@ -4,7 +4,7 @@
         <div>
             <select
                 v-model="selectedCustomerId"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring focus:ring-blue-200 text-sm"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 shadow-sm focus:outline-none focus:ring focus:ring-jade-200 text-sm"
             >
                 <option value="">Vyberte zákazníka</option>
                 <option v-for="customer in customers" :key="customer.id" :value="customer.id">
@@ -12,7 +12,7 @@
                 </option>
             </select>
         </div>
-        <button @click="showAddCustomerModal = true" class="mt-1 text-blue-600 font-bold">+ Přidat</button>
+        <button @click="showAddCustomerModal = true" class="mt-1 text-jade-600 font-bold">+ Přidat</button>
 
         <div v-if="invoice.customer" class="texts-xs text-gray-500 mt-2 space-y-1">
             <div><span class="font-medium">IČ:</span> {{ invoice.customer.ic }}</div>

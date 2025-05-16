@@ -24,7 +24,7 @@
             </tbody>
         </table>
     </div>
-    <button @click="onAddItem" class="mt-2 text-blue-600 font-bold">+ Přidat řádek</button>
+    <button @click="onAddItem" class="mt-2 text-jade-600 font-bold">+ Přidat řádek</button>
 </template>
 
 <script setup>

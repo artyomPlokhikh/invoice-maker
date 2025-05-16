@@ -13,7 +13,7 @@
                     <div class="mt-4">
                         <button
                             @click="saveUserData"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                            class="px-4 py-2 bg-jade-600 text-white rounded-md hover:bg-jade-700"
                         >
                             Uložit údaje
                         </button>
@@ -48,7 +48,8 @@ function saveUserData() {
 
         Swal.fire({
             title: "Údaje byly aktualizovány",
-            icon: "success"
+            icon: "success",
+            confirmButtonColor: '#00bd7e' // jade-500
         }).then(() => {
             router.push({ name: 'Home' });
         });
@@ -68,6 +69,7 @@ onBeforeRouteLeave((to, from, next) => {
             showDenyButton: true,
             showCancelButton: true,
             confirmButtonText: "Uložit",
+            confirmButtonColor: '#00bd7e', // jade-500
             denyButtonText: `Neukládat`
         }).then((result) => {
             if (result.isConfirmed) {
