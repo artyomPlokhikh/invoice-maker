@@ -10,7 +10,7 @@
         <template #body>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Název</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Název účtu</label>
                     <input type="text" v-model="newPayment.name"
                            class="w-full border border-gray-300 rounded-md px-3 py-2"/>
                 </div>
@@ -18,6 +18,23 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Číslo účtu</label>
                     <input type="text" v-model="newPayment.accountNumber"
                            class="w-full border border-gray-300 rounded-md px-3 py-2"/>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kód banky</label>
+                    <select class="w-full border border-gray-300 rounded-md px-3 py-2" v-model="newPayment.code">
+                        <option value="">– Kód banky –</option>
+                        <option v-for="bank in bankCodes" :key="bank.code" :value="bank.code">
+                            {{ `${bank.code} (${bank.name})` }}
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Měna</label>
+                    <select class="w-full border border-gray-300 rounded-md px-3 py-2" v-model="newPayment.currency">
+                        <option value="CZK">CZK</option>
+                        <option value="EUR">EUR</option>
+                        <option value="USD">USD</option>
+                    </select>
                 </div>
             </div>
         </template>
@@ -35,12 +52,14 @@
 
 <script setup>
 import ModalWindow from "@/components/ModalWindow.vue";
-import { reactive } from "vue";
+import { bankCodes } from '@/data/bankCodes';
+import { reactive, watch } from "vue";
 
 const props = defineProps({
-    modelValue: {
-        type: Boolean,
-        default: false
+    modelValue: Boolean,
+    payment: {
+        type: Object,
+        default: () => ({})
     }
 });
 
@@ -49,8 +68,16 @@ const emit = defineEmits(['createPayment', 'update:modelValue']);
 const newPayment = reactive({
     name: '',
     accountNumber: '',
+    currency: 'CZK',
     iban: '',
-    swift: ''
+    swift: '',
+    code: ''
+});
+
+watch(() => props.payment, (val) => {
+    if (val) {
+        Object.assign(newPayment, val);
+    }
 });
 
 function createPayment() {

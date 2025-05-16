@@ -32,7 +32,7 @@
 
         <div v-if="invoice.customer" class="texts-xs text-gray-500 mt-2 space-y-1">
             <div><span class="font-medium">IČ:</span> {{ invoice.customer.ic }}</div>
-            <div><span class="font-medium">DIČ:</span> {{ invoice.customer.dic }}</div>
+            <div v-if="invoice.customer.dic"><span class="font-medium">DIČ:</span> {{ invoice.customer.dic }}</div>
             <div><span class="font-medium">Sídlo:</span> {{ invoice.customer.address }}</div>
         </div>
     </div>
@@ -47,6 +47,8 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import ModalAddCustomer from "@/components/ModalAddCustomer.vue";
+import { useCustomerStore } from "@/stores/CustomerStore.js";
+import { storeToRefs } from "pinia";
 
 const props = defineProps({
     invoice: {
@@ -55,13 +57,8 @@ const props = defineProps({
     },
 });
 
-// Dummy data
-const customers = ref([
-    { name: 'TechFirma s.r.o.', ic: '12345678', dic: 'CZ12345678', address: 'Ulice 12, Praha' },
-    { name: 'Jan Novák', ic: '87654321', dic: 'CZ87654321', address: 'Náměstí 1, Brno' },
-    { name: 'Startup XYZ', ic: '11223344', dic: 'CZ11223344', address: 'Dlouhá 42, Ostrava' }
-]);
-//
+const customerStore = useCustomerStore();
+const { customers } = storeToRefs(customerStore);
 
 const customerSearchQuery = ref('');
 const filteredCustomers = ref([]);

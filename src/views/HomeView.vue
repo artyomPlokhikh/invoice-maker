@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { useInvoiceStore } from '@/stores/invoiceStore';
+import { useInvoiceStore } from '@/stores/InvoiceStore.js';
 import { storeToRefs } from 'pinia';
 import { useRouter } from "vue-router";
 

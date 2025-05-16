@@ -58,6 +58,4 @@ export const useInvoiceStore = defineStore('invoices', () => {
     return {
         invoices
     };
-}, {
-    persist: true
-});
+}, { persist: true });

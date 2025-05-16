@@ -39,9 +39,11 @@
             />
         </div>
 
-        <button @click="showAdditionalInfo = !showAdditionalInfo" class="text-sm text-blue-600 font-medium">
-            {{ showAdditionalInfo ? 'Skrýt detaily' : 'Zobrazit více detailů' }}
-        </button>
+        <div class="flex justify-center">
+            <button @click="showAdditionalInfo = !showAdditionalInfo" class="text-sm text-blue-600 font-medium">
+                {{ showAdditionalInfo ? 'Skrýt detaily' : 'Zobrazit více detailů' }}
+            </button>
+        </div>
 
         <div v-show="showAdditionalInfo" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

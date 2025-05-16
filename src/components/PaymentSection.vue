@@ -16,9 +16,13 @@
         <div><span class="font-medium">IBAN:</span> {{ invoice.paymentMethod.iban }}</div>
         <div><span class="font-medium">SWIFT:</span> {{ invoice.paymentMethod.swift }}</div>
     </div>
+    <button @click="openEditPayment" class="text-sm text-blue-600 font-medium">
+        Upravit bankovní účet
+    </button>
 
     <PaymentModal
         v-model="showAddPaymentModal"
+        :payment="editingPayment"
         @createPayment="onCreatePayment"
     />
 
@@ -27,6 +31,8 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import PaymentModal from "@/components/PaymentModal.vue";
+import { usePaymentMethodStore } from "@/stores/PaymentMethodStore.js";
+import { storeToRefs } from "pinia";
 
 const props = defineProps({
     invoice: {
@@ -35,17 +41,8 @@ const props = defineProps({
     },
 })
 
-// Dummy data
-const paymentMethods = ref([
-    {
-        name: 'Fio banka CZK',
-        accountNumber: '123456789/2010',
-        iban: 'CZ65 2010 0000 0012 3456 7890',
-        swift: 'FIOBCZPPXXX'
-    },
-    { name: 'ČSOB EUR', accountNumber: '987654321/0300', iban: 'CZ55 0300 0000 0009 8765 4321', swift: 'CEKOCZPP' }
-]);
-//
+const paymentMethodStore = usePaymentMethodStore();
+const { paymentMethods } = storeToRefs(paymentMethodStore);
 
 const showAddPaymentModal = ref(false);
 
@@ -53,6 +50,12 @@ function onCreatePayment(payment) {
     paymentMethods.value.push({ ...payment });
     props.invoice.paymentMethod = { ...payment };
     Object.keys(payment).forEach(key => payment[key] = '');
+}
+
+const editingPayment = ref(null);
+function openEditPayment() {
+    editingPayment.value = { ...props.invoice.paymentMethod };
+    showAddPaymentModal.value = true;
 }
 
 onMounted(() => {
