@@ -34,10 +34,17 @@
                 <td class="px-6 py-4">{{ invoice.dueDate }}</td>
                 <td class="px-6 py-4">{{ formatAmount(invoice.amount) }}</td>
                 <td class="px-6 py-4 flex items-center space-x-2">
-                    <button @click="editInvoice(invoice.number)" class="text-gray-500 hover:text-blue-600" title="Upravit">✏️</button>
-                    <button @click="duplicateInvoice(invoice.number)" class="text-gray-500 hover:text-yellow-600" title="Duplikovat">📄</button>
-                    <button class="text-gray-500 hover:text-red-600" title="Export do PDF">📥</button>
-                    <button @click="deleteInvoice(invoice.number)" class="text-gray-500 hover:text-red-600" title="Smazat">
+                    <button @click="editInvoice(invoice.number)" class="text-gray-500 hover:text-blue-600"
+                            title="Upravit">✏️
+                    </button>
+                    <button @click="duplicateInvoice(invoice.number)" class="text-gray-500 hover:text-yellow-600"
+                            title="Duplikovat">📄
+                    </button>
+                    <button @click="goToInvoicePreview(invoice, user)" class="text-gray-500 hover:text-red-600"
+                            title="Export do PDF">📥
+                    </button>
+                    <button @click="deleteInvoice(invoice.number)" class="text-gray-500 hover:text-red-600"
+                            title="Smazat">
                         🗑️
                     </button>
                 </td>
@@ -53,6 +60,10 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import { computed } from "vue";
+import { useInvoicePdfExport } from "@/composables/useInvoicePdfExport.js";
+
+
+const { exportInvoiceToPDF } = useInvoicePdfExport();
 
 const invoiceStore = useInvoiceStore();
 const { invoices } = storeToRefs(invoiceStore);
@@ -60,10 +71,17 @@ const sortedInvoices = computed(() => {
     return [...invoices.value].sort((a, b) => Number(b.number) - Number(a.number));
 });
 
+const userStore = useInvoiceStore();
+const { user } = storeToRefs(userStore);
+
 const router = useRouter();
 
 const goToInvoiceForm = () => {
     router.push({ name: 'InvoiceForm' });
+};
+
+const goToInvoicePreview = (invoice, user) => {
+    router.push({ name: 'InvoicePreview', params: { number:invoice.number } });
 };
 
 const tableColumns = ['Číslo dokladu', 'Stav', 'Popis', 'Odběratel', 'Vystaveno', 'Splatnost', 'Cena', 'Akce'];
@@ -130,4 +148,5 @@ const deleteInvoice = (number) => {
         }
     });
 };
+
 </script>

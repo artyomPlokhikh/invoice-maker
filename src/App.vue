@@ -17,6 +17,6 @@
     </div>
 
 </template>
-<script setup lang="ts">
+<script setup>
 import IconGear from "@/components/svg/IconGear.vue";
 </script>

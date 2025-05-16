@@ -18,6 +18,11 @@ const router = createRouter({
             path: '/settings',
             name: 'Settings',
             component: () => import('@/views/SettingsView.vue')
+        },
+        {
+            path: '/invoice-preview/:number?',
+            name: 'InvoicePreview',
+            component: () => import('@/views/InvoicePreviewView.vue')
         }
     ]
 })

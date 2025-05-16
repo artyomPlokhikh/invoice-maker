@@ -6,7 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
     optimizeDeps: {
-        include: ['buffer'],
+        include: ['jspdf', 'jspdf-autotable', 'qrcode']
     },
     plugins: [
         vue(),

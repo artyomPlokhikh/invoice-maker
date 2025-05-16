@@ -54,6 +54,7 @@
 import ModalWindow from "@/components/ModalWindow.vue";
 import { bankCodes } from '@/data/bankCodes';
 import { reactive, watch } from "vue";
+import { generateCzechIban, getSwiftByBankCode } from "@/utils/paymentUtils.js";
 
 const props = defineProps({
     modelValue: Boolean,
@@ -81,9 +82,13 @@ watch(() => props.payment, (val) => {
 });
 
 function createPayment() {
-    if (!newPayment.accountNumber) return;
+    if (!newPayment.name || !newPayment.accountNumber || !newPayment.code) return;
 
-    const paymentPayload = { ...newPayment };
+    const paymentPayload = {
+        ...newPayment,
+        iban: generateCzechIban(newPayment.accountNumber, newPayment.code),
+        swift: getSwiftByBankCode(newPayment.code),
+    };
 
     Object.keys(newPayment).forEach(key => newPayment[key] = '');
 
