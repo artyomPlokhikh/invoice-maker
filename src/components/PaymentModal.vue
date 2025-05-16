@@ -4,7 +4,7 @@
         @update:modelValue="emit('update:modelValue', $event)"
     >
         <template #header>
-            <h3 class="text-xl font-bold">Přidat platební metodu</h3>
+            <h3 class="text-xl font-bold">{{ props.payment.accountNumber ? 'Editovat platební metodu' : 'Přidat platební metodu' }}</h3>
         </template>
 
         <template #body>

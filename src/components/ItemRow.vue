@@ -3,20 +3,28 @@
         <td class="px-4 py-2 cursor-move" title="Přesunout" @mousedown="onDragStart">☰</td>
         <td class="px-4 py-2">
             <input type="text" v-model="item.name"
+                   @focus="$event.target.select()"
                    class="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
             />
         </td>
         <td class="px-4 py-2">
-            <input type="text" v-model="item.price"
+            <input type="text" v-model="priceInput"
+                   @focus="$event.target.select()"
+                   @blur="formatPriceOnBlur"
                    class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm"
-                   placeholder="23,00"
+                   placeholder="0,00"
             />
         </td>
-        <td class="px-4 py-2">
-            <input type="text" v-model="item.quantity"
-                   class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm"
-                   placeholder="23h 30m"
+        <td class="px-4 py-2 flex items-center">
+            <input type="text" v-model="timeInput"
+                   @focus="$event.target.select()"
+                   @blur="formatTimeOnBlur"
+                   class="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm"
+                   placeholder="0h 0m"
             />
+            <select class="ml-1 border border-gray-300 rounded-md px-2 py-1 text-sm">
+                <option value="h">hodiny</option>
+            </select>
         </td>
         <td class="px-4 py-2">{{ formattedTotal }}</td>
         <td class="px-4 py-2">
@@ -26,7 +34,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { calculateItemTotal, formatPrice } from "@/utils/priceUtils";
 import { useDraggableTable } from "@/composables/useDraggableTable.js";
 
@@ -50,6 +58,56 @@ const rowClasses = computed(() => ({
     'bg-blue-50': draggedItemIndex === props.index,
     'animate-pulse bg-gray-100': isDragTarget === props.index
 }));
+
+const priceInput = ref(String(props.item.price || ''));
+
+const formatPriceOnBlur = () => {
+    const value = parseFloat(priceInput.value.replace(',', '.')) || 0;
+    props.item.price = value;
+    priceInput.value = value.toLocaleString('cs-CZ', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+};
+
+const timeInput = ref(formatTimeValue(props.item.quantity));
+
+function parseTimeInput(input) {
+    if (!input) return 0;
+
+    const hourMatch = input.match(/(\d+)\s*h/i);
+    const minuteMatch = input.match(/(\d+)\s*m/i);
+
+    let hours = hourMatch ? parseInt(hourMatch[1]) : 0;
+    let minutes = minuteMatch ? parseInt(minuteMatch[1]) : 0;
+
+    if (!hourMatch && !minuteMatch) {
+        const numValue = parseFloat(input.replace(',', '.'));
+        if (!isNaN(numValue)) {
+            hours = Math.floor(numValue);
+            minutes = Math.round((numValue - hours) * 60);
+        }
+    }
+
+    return hours + (minutes / 60);
+}
+
+function formatTimeValue(value) {
+    if (!value && value !== 0) return '';
+
+    const numValue = parseFloat(value);
+    if (isNaN(numValue)) return '';
+
+    const hours = Math.floor(numValue);
+    const minutes = Math.round((numValue - hours) * 60);
+
+    return `${hours}h ${minutes}m`;
+}
+
+function formatTimeOnBlur() {
+    props.item.quantity = parseTimeInput(timeInput.value);
+    timeInput.value = formatTimeValue(props.item.quantity);
+}
 
 const formattedTotal = computed(() => {
     return formatPrice(calculateItemTotal(props.item));

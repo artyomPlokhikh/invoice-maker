@@ -6,13 +6,18 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            name: 'invoice',
+            name: 'Home',
             component: HomeView
         },
         {
-            path: '/invoice',
+            path: '/invoice/:number?',
             name: 'InvoiceForm',
             component: () => import('@/views/InvoiceFormView.vue')
+        },
+        {
+            path: '/settings',
+            name: 'Settings',
+            component: () => import('@/views/SettingsView.vue')
         }
     ]
 })

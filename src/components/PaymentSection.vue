@@ -7,7 +7,7 @@
                 {{ method.name }}
             </option>
         </select>
-        <button @click="showAddPaymentModal = true"
+        <button @click="openAddPayment"
                 class="px-3 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-md">+ Přidat
         </button>
     </div>
@@ -46,6 +46,17 @@ const { paymentMethods } = storeToRefs(paymentMethodStore);
 
 const showAddPaymentModal = ref(false);
 
+function openAddPayment() {
+    editingPayment.value = {
+        name: '',
+        accountNumber: '',
+        currency: 'CZK',
+        iban: '',
+        swift: ''
+    };
+    showAddPaymentModal.value = true;
+}
+
 function onCreatePayment(payment) {
     paymentMethods.value.push({ ...payment });
     props.invoice.paymentMethod = { ...payment };
@@ -57,10 +68,4 @@ function openEditPayment() {
     editingPayment.value = { ...props.invoice.paymentMethod };
     showAddPaymentModal.value = true;
 }
-
-onMounted(() => {
-    if (paymentMethods.value.length > 0) {
-        props.invoice.paymentMethod = paymentMethods.value[0];
-    }
-});
 </script>

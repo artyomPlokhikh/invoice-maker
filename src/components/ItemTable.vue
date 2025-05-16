@@ -47,7 +47,7 @@ function onAddItem() {
     emit('addItem', {
         name: '',
         price: 0,
-        quantity: 0
+        quantity: '',
     });
 }
 

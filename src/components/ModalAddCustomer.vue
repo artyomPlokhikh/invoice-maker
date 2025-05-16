@@ -8,48 +8,7 @@
         </template>
 
         <template #body>
-            <div class="space-y-4">
-                <div class="relative">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">IČ</label>
-                    <input type="text" v-model="newCustomer.ic"
-                           @input="handleIcInput"
-                           class="w-full border border-gray-300 rounded-md px-3 py-2"/>
-                    <div v-if="aresSuggestion && !isLoading"
-                         class="absolute z-10 mt-1 bg-white border border-gray-300 rounded-md shadow max-h-40 overflow-y-auto w-full text-sm">
-                        <div @mousedown.capture="fillFromSuggestion"
-                             class="px-3 py-2 hover:bg-gray-100 cursor-pointer">
-                            {{ aresSuggestion.name }}
-                        </div>
-                    </div>
-                    <div v-if="isLoading" class="text-sm text-gray-500 mt-1">
-                        Načítání dat...
-                    </div>
-                    <div v-if="error" class="text-sm text-red-500 mt-1">
-                        {{ error }}
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Jméno/Název</label>
-                    <input type="text" v-model="newCustomer.name"
-                           class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-400 cursor-not-allowed"
-                           disabled
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Adresa</label>
-                    <input type="text" v-model="newCustomer.address"
-                              class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-400 cursor-not-allowed"
-                           disabled
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">DIČ</label>
-                    <input type="text" v-model="newCustomer.dic"
-                           class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-400 cursor-not-allowed"
-                           disabled
-                    />
-                </div>
-            </div>
+            <CustomerForm ref="customerForm" @update="updateCustomerData"/>
         </template>
 
         <template #footer>
@@ -65,8 +24,8 @@
 
 <script setup>
 import ModalWindow from "@/components/ModalWindow.vue";
-import { reactive, ref } from "vue";
-import { getSubjectByICO } from "@/services/ares";
+import CustomerForm from "@/components/PersonForm.vue";
+import { ref } from "vue";
 
 const props = defineProps({
     modelValue: {
@@ -76,59 +35,20 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['createCustomer', 'update:modelValue']);
+const customerForm = ref(null);
+const customerData = ref({});
 
-const newCustomer = reactive({
-    name: '',
-    ic: '',
-    dic: '',
-    address: ''
-});
-
-const aresSuggestion = ref(null);
-const isLoading = ref(false);
-const error = ref('');
-let debounceTimeout = null;
+function updateCustomerData(data) {
+    customerData.value = data;
+}
 
 function createCustomer() {
-    if (!newCustomer.ic) return;
+    if (!customerData.value.ic) return;
 
-    const customerPayload = { ...newCustomer };
-
-    Object.keys(newCustomer).forEach(key => newCustomer[key] = '');
-    aresSuggestion.value = null;
-
+    emit('createCustomer', {
+        ...customerData.value,
+        id: crypto.randomUUID()
+    });
     emit('update:modelValue', false);
-
-    emit('createCustomer', customerPayload);
-}
-
-function handleIcInput() {
-    aresSuggestion.value = null;
-    error.value = '';
-
-    if (debounceTimeout) clearTimeout(debounceTimeout);
-
-    if (newCustomer.ic.length !== 8) return;
-
-    isLoading.value = true;
-    debounceTimeout = setTimeout(async () => {
-        try {
-            aresSuggestion.value = await getSubjectByICO(newCustomer.ic);
-        } catch (err) {
-            error.value = 'Nepodařilo se načíst data z ARES';
-            console.error(err);
-        } finally {
-            isLoading.value = false;
-        }
-    }, 500);
-}
-
-function fillFromSuggestion() {
-    if (aresSuggestion.value) {
-        newCustomer.name = aresSuggestion.value.name;
-        newCustomer.dic = aresSuggestion.value.dic;
-        newCustomer.address = aresSuggestion.value.address;
-        aresSuggestion.value = null;
-    }
 }
 </script>

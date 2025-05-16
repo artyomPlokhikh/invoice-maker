@@ -1,7 +1,8 @@
 <template>
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Faktury</h2>
-        <button @click="goToAddInvoice" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition text-sm shadow">
+        <button @click="goToInvoiceForm"
+                class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition text-sm shadow">
             + Nová faktura
         </button>
     </div>
@@ -16,8 +17,8 @@
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-            <tr v-for="invoice in invoices" :key="invoice.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap">{{ invoice.invoiceNumber }}</td>
+            <tr v-for="invoice in sortedInvoices" :key="invoice.number" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">{{ invoice.number }}</td>
                 <td class="px-6 py-4">
                     <div
                         :class="getStatusColor(invoice.status)"
@@ -28,14 +29,17 @@
                 <td class="px-6 py-4 max-w-[150px] truncate" :title="invoice.description">
                     {{ invoice.description }}
                 </td>
-                <td class="px-6 py-4 max-w-[150px] truncate">{{ invoice.customer }}</td>
+                <td class="px-6 py-4 max-w-[150px] truncate">{{ invoice.customer?.name }}</td>
                 <td class="px-6 py-4">{{ invoice.issueDate }}</td>
                 <td class="px-6 py-4">{{ invoice.dueDate }}</td>
                 <td class="px-6 py-4">{{ formatAmount(invoice.amount) }}</td>
                 <td class="px-6 py-4 flex items-center space-x-2">
-                    <button class="text-gray-500 hover:text-blue-600" title="Upravit">✏️</button>
-                    <button class="text-gray-500 hover:text-yellow-600" title="Duplikovat">📄</button>
+                    <button @click="editInvoice(invoice.number)" class="text-gray-500 hover:text-blue-600" title="Upravit">✏️</button>
+                    <button @click="duplicateInvoice(invoice.number)" class="text-gray-500 hover:text-yellow-600" title="Duplikovat">📄</button>
                     <button class="text-gray-500 hover:text-red-600" title="Export do PDF">📥</button>
+                    <button @click="deleteInvoice(invoice.number)" class="text-gray-500 hover:text-red-600" title="Smazat">
+                        🗑️
+                    </button>
                 </td>
             </tr>
             </tbody>
@@ -47,13 +51,18 @@
 import { useInvoiceStore } from '@/stores/InvoiceStore.js';
 import { storeToRefs } from 'pinia';
 import { useRouter } from "vue-router";
+import Swal from "sweetalert2";
+import { computed } from "vue";
 
 const invoiceStore = useInvoiceStore();
 const { invoices } = storeToRefs(invoiceStore);
+const sortedInvoices = computed(() => {
+    return [...invoices.value].sort((a, b) => Number(b.number) - Number(a.number));
+});
 
 const router = useRouter();
 
-const goToAddInvoice = () => {
+const goToInvoiceForm = () => {
     router.push({ name: 'InvoiceForm' });
 };
 
@@ -91,5 +100,34 @@ const formatAmount = (amount) => {
         currency: 'CZK',
         minimumFractionDigits: 0
     }).format(amount);
+};
+
+const editInvoice = (number) => {
+    router.push({ name: 'InvoiceForm', params: { number } });
+};
+
+const duplicateInvoice = (number) => {
+    const originalInvoice = invoiceStore.invoices.find(invoice => invoice.number === number);
+    if (originalInvoice) {
+        const newInvoice = { ...originalInvoice, number: invoiceStore.generateUniqueInvoiceNumber() };
+        invoiceStore.invoices.push(newInvoice);
+    }
+}
+
+const deleteInvoice = (number) => {
+    Swal.fire({
+        title: "Opravdu chcete smazat tuto fakturu?",
+        text: "Nebudete ji moci vrátit zpět!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        cancelButtonText: "Zrušit",
+        confirmButtonText: "Ano, smazat"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            invoiceStore.invoices = invoiceStore.invoices.filter(invoice => invoice.number !== number);
+        }
+    });
 };
 </script>
