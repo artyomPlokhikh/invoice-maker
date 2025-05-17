@@ -1,5 +1,5 @@
 export function formatPrice(price) {
-    return price.toFixed(2).replace('.', ',');
+    return price?.toFixed(2).replace('.', ',');
 }
 
 export function calculateItemTotal(item) {

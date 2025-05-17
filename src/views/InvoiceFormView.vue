@@ -4,7 +4,6 @@
             <input
                 v-model="invoice.number"
                 class="border border-gray-300 rounded px-2 py-1 w-32 text-xl font-bold ml-1"
-                style="width: 8ch;"
             />
         </template>
         <template v-else>
@@ -89,11 +88,13 @@
     </section>
 
     <div class="flex justify-between items-center mt-8">
-        <div class="text-lg font-semibold">Cena celkem: {{ formatPrice(totalPrice) }} {{ invoice.currency }}</div>
+        <div class="text-lg font-semibold">Cena celkem: {{ formatPrice(invoice.amount) }} {{ invoice.currency }}</div>
         <div class="space-x-2">
-            <button @click="cancel" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">Zrušit
+            <button @click="goToInvoiceList()" class="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100">
+                Zrušit
             </button>
-            <button @click="saveAndGoToList" class="px-4 py-2 bg-jade-600 text-white rounded-md hover:bg-jade-700">
+            <button @click="save(); goToInvoiceList();"
+                    class="px-4 py-2 bg-jade-600 text-white rounded-md hover:bg-jade-700">
                 {{ isEditing ? 'Uložit změny' : 'Uložit' }}
             </button>
         </div>
@@ -103,124 +104,82 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch, onMounted } from 'vue';
+import { ref, reactive, watch } from 'vue';
 import CustomerSection from "@/components/CustomerSection.vue";
 import ItemTable from "@/components/ItemTable.vue";
 import { calculateTotals, formatPrice } from "@/utils/priceUtils.js";
 import PaymentSection from "@/components/PaymentSection.vue";
 import { useRouter, useRoute, onBeforeRouteLeave } from "vue-router";
 import { useInvoiceStore } from "@/stores/InvoiceStore.js";
-import Swal from "sweetalert2";
 import isEqual from 'lodash/isEqual';
 import { usePaymentMethodStore } from "@/stores/PaymentMethodStore.js";
 import { storeToRefs } from "pinia";
 import { useCustomerStore } from "@/stores/CustomerStore.js";
+import { confirmSaveDialog } from "@/utils/swal.js";
 
 
 const router = useRouter();
 const route = useRoute();
-const invoiceStore = useInvoiceStore();
 
+const invoiceStore = useInvoiceStore();
 const paymentMethodStore = usePaymentMethodStore();
 const { paymentMethods } = storeToRefs(paymentMethodStore);
-
 const customerStore = useCustomerStore();
 const { customers } = storeToRefs(customerStore);
 
-const defaultInvoice = {
-    number: invoiceStore.generateUniqueInvoiceNumber(),
-    status: 'unpaid',
-    description: '',
-    issueDate: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    customer: customers.value.length > 0 ? customers.value[0] : null,
-    paymentMethod: paymentMethods.value.length > 0 ? paymentMethods.value[0] : null,
-    variableSymbol: '',
-    constantSymbol: '',
-    currency: 'CZK',
-    items: [],
-    amount: 0,
-};
-
-const invoice = reactive({ ...defaultInvoice });
-
 const isEditing = ref(false);
-const originalInvoice = ref(null);
 const showAdditionalInfo = ref(false);
-const totalPrice = ref(0);
 
-onMounted(() => {
-    const number = route.params.number;
-    if (number) {
-        const foundInvoice = invoiceStore.invoices.find(inv => inv.number === number);
-        if (foundInvoice) {
-            originalInvoice.value = foundInvoice;
-            Object.assign(invoice, JSON.parse(JSON.stringify(foundInvoice)));
-            isEditing.value = true;
-        }
-    } else {
-        invoice.number = invoiceStore.generateUniqueInvoiceNumber();
-    }
+// Invoice initialization
+const invoice = reactive(createDefaultInvoice());
+const initInvoice = ref(JSON.parse(JSON.stringify(invoice)));
+if (route.params.number) {
+    const found = invoiceStore.findInvoiceByNumber(route.params.number);
+    if (found) {
+        Object.assign(invoice, found);
+        isEditing.value = true;
+    };
+}
+initInvoice.value = JSON.parse(JSON.stringify(invoice));
+//
 
-    totalPrice.value = calculateTotals(invoice);
-});
-
-watch(() => invoice.items, () => {
-    totalPrice.value = calculateTotals(invoice);
-}, { deep: true });
+function createDefaultInvoice() {
+    const uniqueNumber = invoiceStore.generateUniqueInvoiceNumber();
+    return {
+        number: uniqueNumber,
+        status: 'unpaid',
+        description: '',
+        issueDate: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        customer: customers.value[0] || null,
+        paymentMethod: paymentMethods.value[0] || null,
+        variableSymbol: uniqueNumber,
+        currency: 'CZK',
+        items: [],
+        amount: 0,
+    };
+}
 
 function save() {
     if (isEditing.value) {
-        const index = invoiceStore.invoices.findIndex(inv => inv.id === invoice.id);
-        if (index !== -1) {
-            invoice.amount = totalPrice.value;
-            invoiceStore.invoices[index] = { ...invoice };
-        }
+        invoiceStore.updateInvoice(invoice);
     } else {
-        invoice.amount = totalPrice.value;
-        invoiceStore.invoices.push({ ...invoice });
+        invoiceStore.addInvoice(invoice)
     }
-    originalInvoice.value = JSON.parse(JSON.stringify(invoice));
+    initInvoice.value = JSON.parse(JSON.stringify(invoice)); // update original to avoid confirmation dialog
 }
 
-function saveAndGoToList() {
-    save();
-    goToInvoiceList();
-}
-
-function cancel() {
-    if (isEditing.value && JSON.stringify(invoice) === JSON.stringify(originalInvoice.value)) {
-        goToInvoiceList();
-        return;
-    }
-
-    Swal.fire({
-        title: "Chcete změny uložit?",
-        showDenyButton: true,
-        showCancelButton: true,
-        confirmButtonText: "Uložit",
-        confirmButtonColor: '#00bd7e', // jade-500
-        denyButtonText: `Neukládat`
-    }).then((result) => {
-        if (result.isConfirmed) {
-            saveAndGoToList();
-        } else if (result.isDenied) {
-            goToInvoiceList();
-        }
-    });
-}
+watch(
+    () => (Array.isArray(invoice.items) ? invoice.items.map(item => [item.price, item.quantity]) : []),
+    () => {
+        invoice.amount = calculateTotals(invoice);
+    },
+);
 
 onBeforeRouteLeave((to, from, next) => {
-    const reference = isEditing.value ? originalInvoice.value : defaultInvoice;
+    const reference = initInvoice.value;
     if (!isEqual(invoice, reference)) {
-        Swal.fire({
-            title: "Chcete změny uložit?",
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: "Uložit",
-            confirmButtonColor: '#00bd7e', // jade-500
-            denyButtonText: `Neukládat`
-        }).then((result) => {
+        confirmSaveDialog().then((result) => {
             if (result.isConfirmed) {
                 save();
                 next();

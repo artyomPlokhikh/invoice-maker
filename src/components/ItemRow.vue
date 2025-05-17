@@ -37,7 +37,7 @@
 import { computed, ref, watch } from 'vue';
 import { calculateItemTotal, formatPrice } from "@/utils/priceUtils";
 import { useDraggableTable } from "@/composables/useDraggableTable.js";
-import { formatTimeValue } from "@/utils/formatters.js";
+import { formatTimeValue, parseTimeInput } from "@/utils/formatters.js";
 
 const props = defineProps({
     item: {
@@ -48,23 +48,12 @@ const props = defineProps({
         type: Number,
         required: true
     },
-    defaultPrice: {
-        type: Number,
-        default: 0
-    }
+    defaultPrice: Number,
 });
 
 const emit = defineEmits(['remove', 'dragStart']);
 
-const { draggedItemIndex, isDragTarget } = useDraggableTable(props);
-
-const rowClasses = computed(() => ({
-    'hover:bg-gray-50': draggedItemIndex !== props.index,
-    'bg-jade-50': draggedItemIndex === props.index,
-    'animate-pulse bg-gray-100': isDragTarget === props.index
-}));
-
-const priceInput = ref(String(props.item.price || defaultPrice.value));
+const priceInput = ref(String(props.item.price || props.defaultPrice.value));
 
 const formatPriceOnBlur = () => {
     const value = parseFloat(priceInput.value.replace(',', '.')) || 0;
@@ -77,26 +66,6 @@ const formatPriceOnBlur = () => {
 
 const timeInput = ref(formatTimeValue(props.item.quantity));
 
-function parseTimeInput(input) {
-    if (!input) return 0;
-
-    const hourMatch = input.match(/(\d+)\s*h/i);
-    const minuteMatch = input.match(/(\d+)\s*m/i);
-
-    let hours = hourMatch ? parseInt(hourMatch[1]) : 0;
-    let minutes = minuteMatch ? parseInt(minuteMatch[1]) : 0;
-
-    if (!hourMatch && !minuteMatch) {
-        const numValue = parseFloat(input.replace(',', '.'));
-        if (!isNaN(numValue)) {
-            hours = Math.floor(numValue);
-            minutes = Math.round((numValue - hours) * 60);
-        }
-    }
-
-    return hours + (minutes / 60);
-}
-
 function formatTimeOnBlur() {
     props.item.quantity = parseTimeInput(timeInput.value);
     timeInput.value = formatTimeValue(props.item.quantity);
@@ -105,6 +74,15 @@ function formatTimeOnBlur() {
 const formattedTotal = computed(() => {
     return formatPrice(calculateItemTotal(props.item));
 });
+
+
+const { draggedItemIndex, isDragTarget } = useDraggableTable(props);
+
+const rowClasses = computed(() => ({
+    'hover:bg-gray-50': draggedItemIndex !== props.index,
+    'bg-jade-50': draggedItemIndex === props.index,
+    'animate-pulse bg-gray-100': isDragTarget === props.index
+}));
 
 function onDragStart(event) {
     emit('dragStart', props.index, event);

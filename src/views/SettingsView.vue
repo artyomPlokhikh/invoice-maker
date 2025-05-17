@@ -28,8 +28,8 @@
 import { computed, ref } from 'vue';
 import CustomerForm from "@/components/PersonForm.vue";
 import { useUserStore } from "@/stores/UserStore.js";
-import Swal from "sweetalert2";
 import { onBeforeRouteLeave, useRouter } from "vue-router";
+import { confirmSaveDialog, dataUpdatedDialog } from "@/utils/swal.js";
 
 
 const userStore = useUserStore();
@@ -46,11 +46,7 @@ function saveUserData() {
         userStore.user = userForm.value.getPersonData();
         originalUser.value = { ...userStore.user };
 
-        Swal.fire({
-            title: "Údaje byly aktualizovány",
-            icon: "success",
-            confirmButtonColor: '#00bd7e' // jade-500
-        }).then(() => {
+        dataUpdatedDialog().then(() => {
             router.push({ name: 'Home' });
         });
     }
@@ -64,14 +60,7 @@ const hasUnsavedChanges = computed(() => {
 
 onBeforeRouteLeave((to, from, next) => {
     if (hasUnsavedChanges.value) {
-        Swal.fire({
-            title: "Chcete změny uložit?",
-            showDenyButton: true,
-            showCancelButton: true,
-            confirmButtonText: "Uložit",
-            confirmButtonColor: '#00bd7e', // jade-500
-            denyButtonText: `Neukládat`
-        }).then((result) => {
+        confirmSaveDialog().then((result) => {
             if (result.isConfirmed) {
                 saveUserData();
                 next();

@@ -63,6 +63,7 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import { computed } from "vue";
+import { confirmDeleteDialog } from "@/utils/swal.js";
 
 
 const invoiceStore = useInvoiceStore();
@@ -84,16 +85,7 @@ const duplicateInvoice = (number) => {
     }
 }
 const deleteInvoice = (number) => {
-    Swal.fire({
-        title: "Opravdu chcete smazat tuto fakturu?",
-        text: "Nebudete ji moci vrátit zpět!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: '#00bd7e', // jade-500
-        cancelButtonText: "Zrušit",
-        confirmButtonText: "Ano, smazat"
-    }).then((result) => {
+    confirmDeleteDialog().then((result) => {
         if (result.isConfirmed) {
             invoiceStore.invoices = invoiceStore.invoices.filter(invoice => invoice.number !== number);
         }
