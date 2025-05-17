@@ -34,18 +34,21 @@
                 <td class="px-6 py-4">{{ invoice.dueDate }}</td>
                 <td class="px-6 py-4">{{ formatAmount(invoice.amount) }}</td>
                 <td class="px-6 py-4 flex items-center space-x-2">
-                    <button @click="editInvoice(invoice.number)" class="text-gray-500 hover:text-blue-600"
+                    <button @click="editInvoice(invoice.number)"
+                            class="text-gray-500 hover:text-blue-600"
                             title="Upravit">✏️
                     </button>
-                    <button @click="duplicateInvoice(invoice.number)" class="text-gray-500 hover:text-yellow-600"
+                    <button @click="duplicateInvoice(invoice.number)"
+                            class="text-gray-500 hover:text-yellow-600"
                             title="Duplikovat">📄
                     </button>
-                    <button @click="goToInvoicePreview(invoice, user)" class="text-gray-500 hover:text-red-600"
+                    <button @click="goToInvoicePreview(invoice)"
+                            class="text-gray-500 hover:text-red-600"
                             title="Export do PDF">📥
                     </button>
-                    <button @click="deleteInvoice(invoice.number)" class="text-gray-500 hover:text-red-600"
-                            title="Smazat">
-                        🗑️
+                    <button @click="deleteInvoice(invoice.number)"
+                            class="text-gray-500 hover:text-red-600"
+                            title="Smazat">🗑️
                     </button>
                 </td>
             </tr>
@@ -60,10 +63,7 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import { computed } from "vue";
-import { useInvoicePdfExport } from "@/composables/useInvoicePdfExport.js";
 
-
-const { exportInvoiceToPDF } = useInvoicePdfExport();
 
 const invoiceStore = useInvoiceStore();
 const { invoices } = storeToRefs(invoiceStore);
@@ -71,58 +71,10 @@ const sortedInvoices = computed(() => {
     return [...invoices.value].sort((a, b) => Number(b.number) - Number(a.number));
 });
 
-const userStore = useInvoiceStore();
-const { user } = storeToRefs(userStore);
-
 const router = useRouter();
-
-const goToInvoiceForm = () => {
-    router.push({ name: 'InvoiceForm' });
-};
-
-const goToInvoicePreview = (invoice, user) => {
-    router.push({ name: 'InvoicePreview', params: { number:invoice.number } });
-};
-
-const tableColumns = ['Číslo dokladu', 'Stav', 'Popis', 'Odběratel', 'Vystaveno', 'Splatnost', 'Cena', 'Akce'];
-
-const getStatusColor = (status) => {
-    switch (status) {
-        case 'paid':
-            return 'bg-green-500';
-        case 'unpaid':
-            return 'bg-yellow-400';
-        case 'overdue':
-            return 'bg-red-500';
-        default:
-            return 'bg-gray-300';
-    }
-};
-
-const getStatusText = (status) => {
-    switch (status) {
-        case 'paid':
-            return 'Uhrazeno';
-        case 'unpaid':
-            return 'Neuhrazeno';
-        case 'overdue':
-            return 'Po splatnosti';
-        default:
-            return 'Neznámý stav';
-    }
-};
-
-const formatAmount = (amount) => {
-    return new Intl.NumberFormat('cs-CZ', {
-        style: 'currency',
-        currency: 'CZK',
-        minimumFractionDigits: 0
-    }).format(amount);
-};
-
-const editInvoice = (number) => {
-    router.push({ name: 'InvoiceForm', params: { number } });
-};
+const goToInvoiceForm = () => router.push({ name: 'InvoiceForm' });
+const goToInvoicePreview = (invoice) => router.push({ name: 'InvoicePreview', params: { number: invoice.number } });
+const editInvoice = (number) => router.push({ name: 'InvoiceForm', params: { number } });
 
 const duplicateInvoice = (number) => {
     const originalInvoice = invoiceStore.invoices.find(invoice => invoice.number === number);
@@ -131,7 +83,6 @@ const duplicateInvoice = (number) => {
         invoiceStore.invoices.push(newInvoice);
     }
 }
-
 const deleteInvoice = (number) => {
     Swal.fire({
         title: "Opravdu chcete smazat tuto fakturu?",
@@ -147,6 +98,40 @@ const deleteInvoice = (number) => {
             invoiceStore.invoices = invoiceStore.invoices.filter(invoice => invoice.number !== number);
         }
     });
+};
+
+
+const tableColumns = ['Číslo dokladu', 'Stav', 'Popis', 'Odběratel', 'Vystaveno', 'Splatnost', 'Cena', 'Akce'];
+const getStatusColor = (status) => {
+    switch (status) {
+        case 'paid':
+            return 'bg-green-500';
+        case 'unpaid':
+            return 'bg-yellow-400';
+        case 'overdue':
+            return 'bg-red-500';
+        default:
+            return 'bg-gray-300';
+    }
+};
+const getStatusText = (status) => {
+    switch (status) {
+        case 'paid':
+            return 'Uhrazeno';
+        case 'unpaid':
+            return 'Neuhrazeno';
+        case 'overdue':
+            return 'Po splatnosti';
+        default:
+            return 'Neznámý stav';
+    }
+};
+const formatAmount = (amount) => {
+    return new Intl.NumberFormat('cs-CZ', {
+        style: 'currency',
+        currency: 'CZK',
+        minimumFractionDigits: 0
+    }).format(amount);
 };
 
 </script>

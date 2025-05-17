@@ -1,24 +1,52 @@
-// import axios from 'axios';
-// import type { TaskLine } from '@/types/types';
-//
-// export interface TimeEntryOpts {
-//     teamId: string;
-//     token: string;
-//     start: number;
-//     end: number;
-//     rateCZK: number;
-// }
-//
-// export async function getTimeEntries({ teamId, token, start, end, rateCZK, }: TimeEntryOpts): Promise<TaskLine[]> {
-//     const url = `https://api.clickup.com/api/v2/team/${teamId}/time_entries`;
-//     const { data } = await axios.get(url, {
-//         params: { start_date: start, end_date: end }, headers: { Authorization: token },
-//     });
-//
-//     return data.data.map((row: any): TaskLine => ({
-//         id: row.task?.id,
-//         name: row.task?.name,
-//         qty: +(row.duration / 3600000).toFixed(2),
-//         unitPrice: rateCZK,
-//     }));
-// }
+import axios from 'axios';
+
+const TOKEN = import.meta.env.VITE_CLICKUP_TOKEN;
+const TEAM_ID = 7536798;
+
+const api = axios.create({
+    baseURL: 'https://api.clickup.com/api/v2',
+    headers: { Authorization: TOKEN }
+});
+
+/**
+ * Get summed hours per task for the given window.
+ *
+ * @param  {Date|string|number} from  start date (Date | ISO | ms)
+ * @param  {Date|string|number} to    end   date (Date | ISO | ms)
+ * @return {Promise<Record<string,string>>}
+ *         e.g. { "My task": "7.33", "Another": "3.50" }
+ */
+export async function getTimeEntries(from, to) {
+    const start = +new Date(from);
+    const end = +new Date(to);
+
+    const tasks = {};
+    let page = 0;
+    const PAGE_SIZE = 1000;
+
+    while (true) {
+        const { data } = await api.get(`/team/${TEAM_ID}/time_entries`, {
+            params: { start_date: start, end_date: end, page }
+        });
+
+        const entries = data?.data ?? [];
+        for (const e of entries) {
+            const id = e.task.id;
+            const name = e.task.name;
+            const dur = +e.duration;
+
+            if (!tasks[id]) tasks[id] = { id, name, ms: 0 };
+            tasks[id].ms += dur;
+        }
+
+        if (entries.length < PAGE_SIZE) break;
+        page += 1;
+    }
+
+    Object.values(tasks).forEach(t => {
+        t.hours = parseFloat((t.ms / 3_600_000).toFixed(2));
+        delete t.ms;
+    });
+
+    return tasks;
+}

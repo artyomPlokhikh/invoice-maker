@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { calculateItemTotal, formatPrice } from "@/utils/priceUtils";
 import { useDraggableTable } from "@/composables/useDraggableTable.js";
 import { formatTimeValue } from "@/utils/formatters.js";
@@ -48,6 +48,10 @@ const props = defineProps({
         type: Number,
         required: true
     },
+    defaultPrice: {
+        type: Number,
+        default: 0
+    }
 });
 
 const emit = defineEmits(['remove', 'dragStart']);
@@ -60,7 +64,7 @@ const rowClasses = computed(() => ({
     'animate-pulse bg-gray-100': isDragTarget === props.index
 }));
 
-const priceInput = ref(String(props.item.price || ''));
+const priceInput = ref(String(props.item.price || defaultPrice.value));
 
 const formatPriceOnBlur = () => {
     const value = parseFloat(priceInput.value.replace(',', '.')) || 0;
@@ -109,4 +113,8 @@ function onDragStart(event) {
 function onRemoveClick() {
     emit('remove', props.index);
 }
+
+watch(() => props.item.quantity, (newVal) => {
+    timeInput.value = formatTimeValue(newVal);
+});
 </script>

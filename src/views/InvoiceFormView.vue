@@ -1,5 +1,16 @@
 <template>
-    <h2 class="text-2xl font-bold">{{ isEditing ? 'Úprava faktury' : 'Faktura vydaná' }} č. {{ invoice.number }}</h2>
+    <h2 class="text-2xl font-bold">{{ isEditing ? 'Úprava faktury' : 'Faktura vydaná' }} č.
+        <template v-if="isEditing">
+            <input
+                v-model="invoice.number"
+                class="border border-gray-300 rounded px-2 py-1 w-32 text-xl font-bold ml-1"
+                style="width: 8ch;"
+            />
+        </template>
+        <template v-else>
+            {{ invoice.number }}
+        </template>
+    </h2>
 
     <section class="bg-white p-6 rounded-xl shadow space-y-6">
         <CustomerSection
@@ -59,7 +70,10 @@
                     <select v-model="invoice.currency"
                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm"
                     >
-                        <option v-for="currency in ['CZK', 'EUR', 'USD']" :key="currency" :value="currency">{{ currency }}</option>
+                        <option v-for="currency in ['CZK', 'EUR', 'USD']" :key="currency" :value="currency">{{
+                                currency
+                            }}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -81,9 +95,6 @@
             </button>
             <button @click="saveAndGoToList" class="px-4 py-2 bg-jade-600 text-white rounded-md hover:bg-jade-700">
                 {{ isEditing ? 'Uložit změny' : 'Uložit' }}
-            </button>
-            <button @click="exportToPdf" class="px-4 py-2 bg-jade-600 text-white rounded-md hover:bg-jade-700">
-                Exportovat do PDF
             </button>
         </div>
     </div>
@@ -175,10 +186,6 @@ function save() {
 function saveAndGoToList() {
     save();
     goToInvoiceList();
-}
-
-function exportToPdf() {
-    console.log('Exporting invoice to PDF');
 }
 
 function cancel() {

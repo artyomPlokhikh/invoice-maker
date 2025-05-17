@@ -1,6 +1,6 @@
 {
-  "name": "vue-ts-boilerplate",
-  "description": " Vue.js 3 TypeScript Boilerplate with Pinia, Vue Router and Tailwind CSS ",
+  "name": "vue-invoice-maker",
+  "description": "",
   "keywords": [
     "template",
     "boilerplate",
@@ -21,7 +21,7 @@
   "version": "1.0.1",
   "private": true,
   "type": "module",
-  "author": "richardevcom <hello@richardev.com> (https://github.com/richardevcom)",
+  "author": "",
   "scripts": {
     "dev": "vite --config vite.config.dev.mts",
     "build": "run-p type-check \"build-only {@}\" --",
