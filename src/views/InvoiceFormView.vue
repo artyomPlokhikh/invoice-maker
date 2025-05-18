@@ -1,17 +1,48 @@
 <template>
-    <h2 class="text-2xl font-bold">{{ isEditing ? 'Úprava faktury' : 'Faktura vydaná' }} č.
-        <template v-if="isEditing">
-            <input
-                v-model="invoice.number"
-                class="border border-gray-300 rounded px-2 py-1 w-32 text-xl font-bold ml-1"
-            />
+    <h2 class="text-2xl font-bold">
+        {{ isEditing ? 'Úprava faktury' : 'Faktura vydaná' }} č.
+        <template v-if="editingNumber">
+            <span class="relative ml-1 inline-block align-bottom">
+                <input
+                    v-model="editedNumber"
+                    @input="editedNumber = editedNumber.replace(/\D/g, '')"
+                    @blur="tryUpdateNumber"
+                    @keyup.enter="tryUpdateNumber"
+                    class="border border-gray-300 rounded w-32 font-inherit"
+                    :class="{ 'border-red-500': numberExists }"
+                />
+                <span
+                    v-if="numberExists"
+                    class="absolute left-0 w-max text-red-500 text-xs mt-1"
+                    style="top:100%;"
+                >Toto číslo již existuje
+                </span>
+            </span>
         </template>
         <template v-else>
-            {{ invoice.number }}
+            <span class="ml-1">{{ invoice.number }}</span>
         </template>
+        <button
+            @click="editingNumber ? tryUpdateNumber() : startEditingNumber()"
+            class="ml-2 inline-flex items-center justify-center text-gray-500 hover:text-jade-600 disabled:text-gray-300 disabled:cursor-not-allowed"
+            title="Upravit číslo"
+            :disabled="numberExists"
+        >
+            <IconEdit class="inline w-5 h-5 align-middle"/>
+        </button>
     </h2>
 
     <section class="bg-white p-6 rounded-xl shadow space-y-6">
+        <div class="flex items-center gap-4">
+            <label class="block text-sm font-medium text-gray-700">Stav faktury</label>
+            <select v-model="invoice.status"
+                    class="border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm">
+                <option value="unpaid">Neuhrazeno</option>
+                <option value="paid">Uhrazeno</option>
+                <option value="overdue">Po splatnosti</option>
+            </select>
+        </div>
+
         <CustomerSection v-model:customer="invoice.customer"/>
 
         <div>
@@ -96,7 +127,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
 import CustomerSection from "@/components/CustomerSection.vue";
 import ItemTable from "@/components/ItemTable.vue";
 import { calculateTotals, formatPrice } from "@/utils/priceUtils.js";
@@ -108,6 +139,7 @@ import { usePaymentMethodStore } from "@/stores/PaymentMethodStore.js";
 import { storeToRefs } from "pinia";
 import { useCustomerStore } from "@/stores/CustomerStore.js";
 import { confirmSaveDialog } from "@/utils/swal.js";
+import IconEdit from "../components/svg/IconEdit.vue";
 
 
 const router = useRouter();
@@ -150,6 +182,27 @@ function createDefaultInvoice() {
         amount: 0,
     };
 }
+
+// Invoice number editing
+const editingNumber = ref(false);
+const editedNumber = ref(invoice.number);
+
+function startEditingNumber() {
+    editingNumber.value = true;
+}
+
+function tryUpdateNumber() {
+    if (!numberExists.value && editedNumber.value) {
+        invoice.number = editedNumber.value;
+        editingNumber.value = false;
+    }
+}
+
+const numberExists = computed(() => {
+    return invoiceStore.invoices.some(inv =>
+        inv.number === editedNumber.value && (!isEditing.value || inv.number !== route.params.number)
+    );
+});
 
 function save() {
     if (isEditing.value) {

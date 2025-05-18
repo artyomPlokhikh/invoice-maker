@@ -1,171 +1,180 @@
 <template>
     <div class="container mx-auto px-4 py-6">
-        <div class="bg-white shadow rounded-xl divide-y divide-gray-100">
+        <div class="bg-white shadow rounded-xl">
 
-            <header class="p-6">
+            <header class="p-6 border-b border-gray-100">
                 <h2 class="text-2xl font-bold">Nastavení účtu</h2>
             </header>
 
-            <!-- user data --------------------------------------------------------->
-            <section aria-labelledby="heading-user" class="p-6">
-                <h3 id="heading-user" class="text-xl font-semibold mb-4">
-                    Údaje o uživateli
-                </h3>
+            <div class="divide-y md:divide-y-0 md:divide-x divide-gray-100 md:flex">
 
-                <div class="max-w-md space-y-4">
-                    <PersonForm ref="userForm" :initialData="originalUser"/>
-
-                    <button
-                        @click="saveUserData"
-                        :disabled="!hasUserChanges"
-                        class="w-max px-4 py-2 rounded-md bg-jade-600 text-white hover:bg-jade-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Uložit údaje
-                    </button>
-                </div>
-            </section>
-
-            <!-- customers --------------------------------------------------------->
-            <section aria-labelledby="heading-customers" class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 id="heading-customers" class="text-xl font-semibold">
-                        Správa zákazníků
+                <section aria-labelledby="heading-user" class="p-6 md:w-1/2">
+                    <h3 id="heading-user" class="text-xl font-semibold mb-4">
+                        Údaje o uživateli
                     </h3>
 
-                    <button
-                        @click="startAddCustomer"
-                        class="mt-1 text-jade-600 font-bold"
-                    >+ Přidat zákazníka
-                    </button>
-                </div>
+                    <div class="max-w-md space-y-4">
+                        <PersonForm ref="userForm" :initialData="originalUser"/>
 
-                <ul class="space-y-2">
-                    <li
-                        v-for="customer in customers"
-                        :key="customer.ic"
-                        class="flex items-center justify-between"
-                    >
-                        <span>{{ customer.name }} ({{ customer.ic }})</span>
                         <button
-                            @click="deleteCustomer(customer.ic)"
-                            class="delete-btn p-1 rounded transition-colors"
-                            title="Smazat"
+                            @click="saveUserData"
+                            :disabled="!hasUserChanges"
+                            class="w-max px-4 py-2 rounded-md bg-jade-600 text-white hover:bg-jade-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <IconDelete class="icon icon-delete "/>
+                            Uložit údaje
                         </button>
-                    </li>
-                </ul>
+                    </div>
+                </section>
 
-                <ModalAddCustomer
-                    :model-value="showAddCustomerModal"
-                    @update:modelValue="showAddCustomerModal = $event"
-                    @createCustomer="addCustomer"
-                />
-            </section>
-
-            <!-- payment methods --------------------------------------------------->
-            <section aria-labelledby="heading-payments" class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 id="heading-payments" class="text-xl font-semibold">
-                        Platební metody
+                <section aria-labelledby="heading-clickup" class="p-6 md:w-1/2">
+                    <h3 id="heading-clickup"
+                        class="text-xl font-semibold mb-4 flex items-center gap-2"
+                    >ClickUp Integration
+                        <span class="relative group">
+                            <IconQuestion class="text-gray-400 cursor-pointer"/>
+                            <span
+                                class="absolute left-1/2 -translate-x-1/2 mt-2 w-64 p-2 rounded
+                                bg-gray-800 text-xs text-white opacity-0 group-hover:opacity-100
+                                transition pointer-events-none z-10"
+                            >
+                                Pro získání ClickUp API tokenu otevřete Nastavení &gt; Aplikace
+                                &gt; Vygenerovat token.<br>
+                                Team ID najdete v URL svého workspace za /team/.
+                            </span>
+                        </span>
                     </h3>
 
-                    <button
-                        @click="startAddPaymentMethod"
-                        class="mt-1 text-jade-600 font-bold"
-                    >+ Přidat platební metodu
-                    </button>
-                </div>
+                    <form class="max-w-md space-y-4" @submit.prevent="saveClickupData">
+                        <div>
+                            <label for="apiToken"
+                                   class="block mb-1 text-sm font-medium text-gray-700">
+                                API Token
+                            </label>
+                            <input
+                                id="apiToken"
+                                type="text"
+                                v-model="clickupForm.apiToken"
+                                :placeholder="clickupStore.apiToken"
+                                autocomplete="off"
+                                spellcheck="false"
+                                style="-webkit-text-security: disc;"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2"
+                            />
+                        </div>
 
-                <ul class="space-y-2">
-                    <li
-                        v-for="pm in paymentMethodStore.paymentMethods"
-                        :key="pm.iban"
-                        class="flex items-center justify-between"
-                    >
-                        <span>{{ pm.name }} ({{ pm.iban }})</span>
-                        <div class="flex gap-2">
+                        <div>
+                            <label for="teamId"
+                                   class="block mb-1 text-sm font-medium text-gray-700">
+                                Team ID
+                            </label>
+                            <input
+                                id="teamId"
+                                type="text"
+                                v-model="clickupForm.teamId"
+                                :placeholder="clickupStore.teamId"
+                                class="w-full border border-gray-300 rounded-md px-3 py-2"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            :disabled="!hasClickupChanges"
+                            class="w-max px-4 py-2 rounded-md bg-jade-600 text-white hover:bg-jade-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Uložit ClickUp údaje
+                        </button>
+                    </form>
+                </section>
+            </div>
+
+            <div class="divide-y md:divide-y-0 md:divide-x divide-gray-100 md:flex">
+
+                <section aria-labelledby="heading-customers" class="p-6 md:w-1/2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 id="heading-customers" class="text-xl font-semibold">
+                            Správa zákazníků
+                        </h3>
+
+                        <button
+                            @click="startAddCustomer"
+                            class="mt-1 text-jade-600 font-bold"
+                        >
+                            + Přidat zákazníka
+                        </button>
+                    </div>
+
+                    <ul class="space-y-2 w-80 max-h-72 overflow-y-auto pr-1">
+                        <li
+                            v-for="customer in customers"
+                            :key="customer.ic"
+                            class="flex items-center justify-between"
+                        >
+                            <span>{{ customer.name }} ({{ customer.ic }})</span>
                             <button
-                                @click="editPaymentMethod(pm)"
-                                class="edit-btn p-1 rounded transition-colors"
-                                title="Upravit"
-                            >
-                                <IconEdit class="icon icon-edit "/>
-                            </button>
-                            <button
-                                @click="deletePaymentMethod(pm.iban)"
+                                @click="deleteCustomer(customer.ic)"
                                 class="delete-btn p-1 rounded transition-colors"
                                 title="Smazat"
                             >
-                                <IconDelete class="icon icon-delete "/>
+                                <IconDelete class="icon icon-delete"/>
                             </button>
-                        </div>
-                    </li>
-                </ul>
+                        </li>
+                    </ul>
 
-                <PaymentModal
-                    :model-value="showAddPaymentModal"
-                    :payment="editingPayment"
-                    @update:modelValue="showAddPaymentModal = $event"
-                    @createPayment="onCreatePayment"
-                />
-            </section>
+                    <ModalAddCustomer
+                        :model-value="showAddCustomerModal"
+                        @update:modelValue="showAddCustomerModal = $event"
+                        @createCustomer="addCustomer"
+                    />
+                </section>
 
-            <!-- ClickUp ----------------------------------------------------------->
-            <section aria-labelledby="heading-clickup" class="p-6">
-                <h3 id="heading-clickup" class="text-xl font-semibold mb-4 flex items-center gap-2">
-                ClickUp Integration
-                    <span class="relative group">
-                        <IconQuestion class="text-gray-400 cursor-pointer"/>
-                        <span class="absolute left-1/2 -translate-x-1/2 mt-2 w-64 p-2 rounded bg-gray-800 text-xs text-white opacity-0 group-hover:opacity-100 transition pointer-events-none z-10">
-                            Pro získání ClickUp API tokenu otevřete Nastavení &gt; Aplikace &gt; Vygenerovat token.<br>
-                            Team ID najdete v URL svého workspace za /team/.
-                        </span>
-                    </span>
-                </h3>
+                <section aria-labelledby="heading-payments" class="p-6 md:w-1/2">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 id="heading-payments" class="text-xl font-semibold">
+                            Platební metody
+                        </h3>
 
-                <form class="max-w-md space-y-4" @submit.prevent="saveClickupData">
-                    <div>
-                        <label
-                            for="apiToken"
-                            class="block mb-1 text-sm font-medium text-gray-700"
+                        <button
+                            @click="startAddPaymentMethod"
+                            class="mt-1 text-jade-600 font-bold"
                         >
-                            API Token
-                        </label>
-                        <input
-                            id="apiToken"
-                            type="password"
-                            v-model="clickupForm.apiToken"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2"
-                            :placeholder="clickupStore.apiToken"
-                        />
+                            + Přidat platební metodu
+                        </button>
                     </div>
 
-                    <div>
-                        <label
-                            for="teamId"
-                            class="block mb-1 text-sm font-medium text-gray-700"
+                    <ul class="space-y-2 w-80 max-h-72 overflow-y-auto pr-1">
+                        <li
+                            v-for="pm in paymentMethodStore.paymentMethods"
+                            :key="pm.iban"
+                            class="flex items-center justify-between"
                         >
-                            Team ID
-                        </label>
-                        <input
-                            id="teamId"
-                            type="text"
-                            v-model="clickupForm.teamId"
-                            class="w-full border border-gray-300 rounded-md px-3 py-2"
-                            :placeholder="clickupStore.teamId"
-                        />
-                    </div>
+                            <span>{{ pm.name }} ({{ pm.iban }})</span>
+                            <div class="flex gap-2">
+                                <button
+                                    @click="editPaymentMethod(pm)"
+                                    class="edit-btn p-1 rounded transition-colors"
+                                    title="Upravit"
+                                >
+                                    <IconEdit class="icon icon-edit"/>
+                                </button>
+                                <button
+                                    @click="deletePaymentMethod(pm.iban)"
+                                    class="delete-btn p-1 rounded transition-colors"
+                                    title="Smazat"
+                                >
+                                    <IconDelete class="icon icon-delete"/>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
 
-                    <button
-                        type="submit"
-                        :disabled="!hasClickupChanges"
-                        class="w-max px-4 py-2 rounded-md bg-jade-600 text-white hover:bg-jade-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Uložit ClickUp údaje
-                    </button>
-                </form>
-            </section>
+                    <PaymentModal
+                        :model-value="showAddPaymentModal"
+                        :payment="editingPayment"
+                        @update:modelValue="showAddPaymentModal = $event"
+                        @createPayment="onCreatePayment"
+                    />
+                </section>
+            </div>
         </div>
     </div>
 </template>
