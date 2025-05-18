@@ -28,7 +28,9 @@
         </td>
         <td class="px-4 py-2">{{ formattedTotal }}</td>
         <td class="px-4 py-2">
-            <button @click="onRemoveClick" class="text-red-600 hover:text-red-800" title="Smazat">🗑️</button>
+            <button @click="onRemoveClick" class="delete-btn p-1 rounded" title="Smazat">
+                <IconDelete class="icon icon-delete"/>
+            </button>
         </td>
     </tr>
 </template>
@@ -37,7 +39,8 @@
 import { computed, ref, watch } from 'vue';
 import { calculateItemTotal, formatPrice } from "@/utils/priceUtils";
 import { useDraggableTable } from "@/composables/useDraggableTable.js";
-import { formatTimeValue, parseTimeInput } from "@/utils/formatters.js";
+import { evaluateTimeExpression, formatTimeValue } from "@/utils/formatters.js";
+import IconDelete from "@/components/svg/IconDelete.vue";
 
 const props = defineProps({
     item: {
@@ -67,7 +70,7 @@ const formatPriceOnBlur = () => {
 const timeInput = ref(formatTimeValue(props.item.quantity));
 
 function formatTimeOnBlur() {
-    props.item.quantity = parseTimeInput(timeInput.value);
+    props.item.quantity = evaluateTimeExpression(timeInput.value);
     timeInput.value = formatTimeValue(props.item.quantity);
 }
 

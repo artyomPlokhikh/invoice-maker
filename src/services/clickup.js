@@ -1,7 +1,7 @@
 import axios from 'axios';
+import { useClickupStore } from "@/stores/ClickupStore.js";
 
-const TOKEN = import.meta.env.VITE_CLICKUP_TOKEN;
-const TEAM_ID = 7536798;
+const { apiToken: TOKEN, teamId: TEAM_ID } = useClickupStore();
 
 const api = axios.create({
     baseURL: 'https://api.clickup.com/api/v2',

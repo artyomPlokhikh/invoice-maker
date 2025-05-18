@@ -13,7 +13,7 @@ export function confirmSaveDialog() {
 
 export function confirmDeleteDialog() {
     return Swal.fire({
-        title: "Opravdu chcete smazat tuto fakturu?",
+        title: "Opravdu chcete smazat?",
         text: "Nebudete ji moci vrátit zpět!",
         icon: "warning",
         showCancelButton: true,

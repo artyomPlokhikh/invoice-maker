@@ -2,3 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+/* button icons */
+.edit-btn .icon-edit,
+.delete-btn .icon-delete,
+.duplicate-btn .icon-duplicate,
+.export-btn .icon-export {
+  fill: currentColor;
+  stroke: currentColor;
+  transition: color .15s ease, stroke .15s ease, fill .15s ease;
+}
+
+/* Hover color overrides */
+.edit-btn:hover .icon-edit,
+.duplicate-btn:hover .icon-duplicate,
+.export-btn:hover .icon-export {
+  color: #4f46e5;
+}
+
+.delete-btn:hover .icon-delete {
+  color: #dc2626;
+}

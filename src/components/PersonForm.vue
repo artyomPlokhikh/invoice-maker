@@ -5,7 +5,7 @@
             <input
                 type="text"
                 v-model="person.ic"
-                placeholder="Zadejte IČ"
+                :placeholder="initialData.ic || 'Zadejte IČ'"
                 @focus="$event.target.select()"
                 @input="handleIcInput"
                 class="w-full border border-gray-300 rounded-md px-3 py-2"
@@ -33,7 +33,8 @@
             <input
                 type="text"
                 v-model="person.name"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-400 cursor-not-allowed"
+                :placeholder="initialData.name"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed"
                 disabled
             />
         </div>
@@ -42,7 +43,8 @@
             <input
                 type="text"
                 v-model="person.address"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-400 cursor-not-allowed"
+                :placeholder="initialData.address"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed"
                 disabled
             />
         </div>
@@ -51,7 +53,8 @@
             <input
                 type="text"
                 v-model="person.dic"
-                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 text-gray-400 cursor-not-allowed"
+                :placeholder="initialData.dic"
+                class="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100 cursor-not-allowed"
                 disabled
             />
         </div>

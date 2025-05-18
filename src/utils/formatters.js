@@ -11,7 +11,7 @@ export function formatTimeValue(value) {
     ].filter(Boolean).join(' ');
 }
 
-export function parseTimeInput(input) {
+function parseTimeInput(input) {
     if (!input) return 0;
 
     const hourMatch = input.match(/(\d+)\s*h/i);
@@ -29,4 +29,22 @@ export function parseTimeInput(input) {
     }
 
     return hours + (minutes / 60);
+}
+
+export function evaluateTimeExpression(input) {
+    if (!input) return 0;
+    let normalized = input.replace(',', '.').replace(/\s+/g, '');
+    const parts = normalized.split(/([+-])/).filter(Boolean);
+
+    let total = 0;
+    let currentOp = '+';
+    for (let part of parts) {
+        if (part === '+' || part === '-') {
+            currentOp = part;
+        } else {
+            let value = parseTimeInput(part);
+            total = currentOp === '+' ? total + value : total - value;
+        }
+    }
+    return total;
 }

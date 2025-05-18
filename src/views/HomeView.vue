@@ -35,20 +35,24 @@
                 <td class="px-6 py-4">{{ formatAmount(invoice.amount) }}</td>
                 <td class="px-6 py-4 flex items-center space-x-2">
                     <button @click="editInvoice(invoice.number)"
-                            class="text-gray-500 hover:text-blue-600"
-                            title="Upravit">✏️
+                            class="edit-btn p-1 rounded transition-colors"
+                            title="Upravit">
+                        <IconEdit class="icon icon-edit"/>
                     </button>
                     <button @click="duplicateInvoice(invoice.number)"
-                            class="text-gray-500 hover:text-yellow-600"
-                            title="Duplikovat">📄
+                            class="duplicate-btn p-1 rounded transition-colors"
+                            title="Duplikovat">
+                        <IconDuplicate class="icon icon-duplicate"/>
                     </button>
                     <button @click="goToInvoicePreview(invoice)"
-                            class="text-gray-500 hover:text-red-600"
-                            title="Export do PDF">📥
+                            class="export-btn p-1 rounded transition-colors"
+                            title="Export do PDF">
+                        <IconExport class="icon icon-export"/>
                     </button>
                     <button @click="deleteInvoice(invoice.number)"
-                            class="text-gray-500 hover:text-red-600"
-                            title="Smazat">🗑️
+                            class="delete-btn p-1 rounded transition-colors"
+                            title="Smazat">
+                        <IconDelete class="icon icon-delete"/>
                     </button>
                 </td>
             </tr>
@@ -64,6 +68,10 @@ import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import { computed } from "vue";
 import { confirmDeleteDialog } from "@/utils/swal.js";
+import IconDelete from "@/components/svg/IconDelete.vue";
+import IconExport from "@/components/svg/IconExport.vue";
+import IconDuplicate from "@/components/svg/IconDuplicate.vue";
+import IconEdit from "@/components/svg/IconEdit.vue";
 
 
 const invoiceStore = useInvoiceStore();

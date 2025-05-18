@@ -12,11 +12,13 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Název účtu</label>
                     <input type="text" v-model="newPayment.name"
+                           :placeholder="payment.name || 'např. Hlavní účet'"
                            class="w-full border border-gray-300 rounded-md px-3 py-2"/>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Číslo účtu</label>
                     <input type="text" v-model="newPayment.accountNumber"
+                           :placeholder="payment.accountNumber"
                            class="w-full border border-gray-300 rounded-md px-3 py-2"/>
                 </div>
                 <div>

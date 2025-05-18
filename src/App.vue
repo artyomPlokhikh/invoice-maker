@@ -5,8 +5,8 @@
                 <RouterLink to="/" class="text-jade-600 hover:text-jade-800">
                     InvoiceApp
                 </RouterLink>
-                <RouterLink to="/settings" class="text-jade-600 flex items-center gap-1 group">
-                    <IconGear class="w-5 h-5 transition-colors group-hover:text-jade-700" />
+                <RouterLink to="/settings" title="Nastavení">
+                    <IconGear class="icon w-5 h-5 "/>
                 </RouterLink>
             </div>
 
