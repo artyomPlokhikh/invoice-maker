@@ -4,7 +4,7 @@
         @update:modelValue="emit('update:modelValue', $event)"
     >
         <template #header>
-            <h3 class="text-xl font-bold">{{ props.payment.accountNumber ? 'Editovat platební metodu' : 'Přidat platební metodu' }}</h3>
+            <h3 class="text-xl font-bold">{{ isEditing ? 'Editovat platební metodu' : 'Přidat platební metodu' }}</h3>
         </template>
 
         <template #body>
@@ -44,7 +44,13 @@
                 <button @click="emit('update:modelValue', false)" class="px-4 py-2 border border-gray-300 rounded-md">
                     Zrušit
                 </button>
-                <button @click="createPayment" class="px-4 py-2 bg-jade-600 text-white rounded-md">Přidat</button>
+                <button
+                    @click="createPayment"
+                    :disabled="!requiredFieldsFilled"
+                    class="px-4 py-2 bg-jade-600 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {{ isEditing ? 'Uložit' : 'Přidat' }}
+                </button>
             </div>
         </template>
     </ModalWindow>
@@ -53,7 +59,7 @@
 <script setup>
 import ModalWindow from "@/components/ModalWindow.vue";
 import { bankCodes } from '@/data/bankCodes';
-import { reactive, watch } from "vue";
+import { computed, reactive, watch } from "vue";
 import { generateCzechIban, getSwiftByBankCode } from "@/utils/paymentUtils.js";
 
 const props = defineProps({
@@ -64,25 +70,20 @@ const props = defineProps({
     }
 });
 
-const emit = defineEmits(['createPayment', 'update:modelValue']);
+const emit = defineEmits(['createPayment', 'editPayment', 'update:modelValue']);
 
-const newPayment = reactive({
-    name: '',
-    accountNumber: '',
-    currency: 'CZK',
-    iban: '',
-    swift: '',
-    code: ''
-});
-
-watch(() => props.payment, (val) => {
-    if (val) {
-        Object.assign(newPayment, val);
-    }
-});
+const isEditing = computed(() => !!props.payment.iban);
+const newPayment = reactive({ ...props.payment });
+watch(
+    () => props.payment,
+    (val) => {
+        Object.assign(newPayment, val || {});
+    },
+    { immediate: true }
+);
 
 function createPayment() {
-    if (!newPayment.name || !newPayment.accountNumber || !newPayment.code) return;
+    if (!requiredFieldsFilled.value) return;
 
     const paymentPayload = {
         ...newPayment,
@@ -93,7 +94,10 @@ function createPayment() {
     Object.keys(newPayment).forEach(key => newPayment[key] = '');
 
     emit('update:modelValue', false);
-
-    emit('createPayment', paymentPayload);
+    emit(isEditing ? 'createPayment' : 'editPayment', paymentPayload);
 }
+
+const requiredFieldsFilled = computed(() =>
+    !!newPayment.name && !!newPayment.accountNumber && !!newPayment.code && !!newPayment.currency
+);
 </script>

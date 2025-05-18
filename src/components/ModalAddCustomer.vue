@@ -45,10 +45,7 @@ function updateCustomerData(data) {
 function createCustomer() {
     if (!customerData.value.ic) return;
 
-    emit('createCustomer', {
-        ...customerData.value,
-        id: crypto.randomUUID()
-    });
+    emit('createCustomer', customerData.value);
     emit('update:modelValue', false);
 }
 </script>

@@ -16,7 +16,7 @@
                 <th class="px-4 py-2">Položka</th>
                 <th class="px-4 py-2">
                     Cena
-                    <button @click="togglePriceMenu" class="ml-1 text-gray-500 hover:text-jade-600">
+                    <button @click="showPriceMenu = !showPriceMenu" class="ml-1 text-gray-500 hover:text-jade-600">
                         <span class="text-xs">⚙️</span>
                     </button>
                     <div v-if="showPriceMenu"
@@ -57,7 +57,7 @@
                 :index="index"
                 :defaultPrice="defaultPrice"
                 @dragStart="prepareForDrag"
-                @remove="emit('removeItem', index)"
+                @remove="removeItem(index)"
             />
             </tbody>
         </table>
@@ -106,20 +106,14 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import ItemRow from "@/components/ItemRow.vue";
 import ModalWindow from "@/components/ModalWindow.vue";
 import { useDraggableTable } from "@/composables/useDraggableTable.js";
 import { getTimeEntries } from "@/services/clickup.js";
 
-const props = defineProps({
-    items: {
-        type: Object,
-        required: true
-    }
-});
-
-const emit = defineEmits(['removeItem', 'addItem']);
+const props = defineProps({ items: Object });
+const emit = defineEmits(['update:items']);
 
 const { itemsTableBody, prepareForDrag } = useDraggableTable(props.items);
 const showPriceMenu = ref(false);
@@ -145,22 +139,24 @@ function openClickupModal() {
     showClickupModal.value = true;
 }
 
-function addItem(options = {}) {
-    emit('addItem', {
-        name: options.name || '',
-        price: options.price || defaultPrice.value,
-        quantity: options.quantity || 0,
-    });
+function addItem(newItem = {}) {
+    emit('update:items', [...props.items, newItem]);
 }
 
-function togglePriceMenu() {
-    showPriceMenu.value = !showPriceMenu.value;
+function removeItem(index) {
+    const updated = props.items.slice();
+    updated.splice(index, 1);
+    emit('update:items', updated);
 }
 
 function applyDefaultPrice() {
-    props.items.forEach(item => {
-        item.price = Number(defaultPrice.value);
+    const updated = props.items.map(item => {
+        if (!item.price || item.price === '' || item.price === 0) {
+            return { ...item, price: Number(defaultPrice.value) };
+        }
+        return item;
     });
+    emit('update:items', updated);
     showPriceMenu.value = false;
 }
 
@@ -173,12 +169,15 @@ function handleClickOutside(event) {
 
 async function getFromClickup() {
     const timeEntries = await getTimeEntries(startDate.value, endDate.value);
+    const newItems = [];
     for (const entry of Object.values(timeEntries)) {
-        addItem({
+        newItems.push({
             name: entry.name,
+            price: defaultPrice.value || 0,
             quantity: entry.hours,
         });
     }
+    emit('update:items', [...props.items, ...newItems]);
     showClickupModal.value = false;
 }
 
@@ -192,11 +191,13 @@ function sortBy(key) {
         sortKey.value = key;
         sortOrder.value = 1;
     }
-    props.items.sort((a, b) => {
+    const itemsToSort = [...props.items];
+    itemsToSort.sort((a, b) => {
         const aVal = a[key] ?? 0;
         const bVal = b[key] ?? 0;
         return (aVal - bVal) * sortOrder.value;
     });
+    emit('update:items', itemsToSort);
 }
 
 onMounted(() => {

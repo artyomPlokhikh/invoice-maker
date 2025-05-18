@@ -1,50 +1,63 @@
 <template>
     <label class="block text-sm font-medium text-gray-700">Moje platební údaje</label>
     <div class="flex gap-2">
-        <select v-model="invoice.paymentMethod"
-                class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm">
-            <option v-for="(method, index) in paymentMethods" :key="index" :value="method">
+        <select
+            v-model="selectedPM"
+            class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm"
+        >
+            <option value="">Vyberte platební údaje</option>
+            <option v-for="method in paymentMethodStore.paymentMethods" :key="method.iban" :value="method.iban">
                 {{ method.name }}
             </option>
         </select>
-        <button @click="openAddPayment"
-                class="px-3 py-2 text-sm bg-jade-600 text-white hover:bg-jade-700 rounded-md">+ Přidat
+
+        <button
+            @click="openAddPayment"
+            class="px-3 py-2 text-sm bg-jade-600 text-white hover:bg-jade-700 rounded-md"
+        >+ Přidat
         </button>
     </div>
-    <div v-if="invoice.paymentMethod" class="text-xs text-gray-500 mt-2 space-y-1">
-        <div><span class="font-medium">Číslo účtu:</span> {{ invoice.paymentMethod.accountNumber }}</div>
-        <div><span class="font-medium">IBAN:</span> {{ invoice.paymentMethod.iban }}</div>
-        <div><span class="font-medium">SWIFT:</span> {{ invoice.paymentMethod.swift }}</div>
+
+    <div v-if="paymentMethod">
+        <div class="text-xs text-gray-500 mt-2 space-y-1">
+            <div><span class="font-medium">Číslo účtu:</span> {{ paymentMethod.accountNumber }}</div>
+            <div><span class="font-medium">IBAN:</span> {{ paymentMethod.iban }}</div>
+            <div><span class="font-medium">SWIFT:</span> {{ paymentMethod.swift }}</div>
+        </div>
+        <button @click="openEditPayment" class="text-sm text-jade-600 font-medium">
+            Upravit bankovní účet
+        </button>
     </div>
-    <button @click="openEditPayment" class="text-sm text-jade-600 font-medium">
-        Upravit bankovní účet
-    </button>
 
     <PaymentModal
         v-model="showAddPaymentModal"
         :payment="editingPayment"
         @createPayment="onCreatePayment"
+        @editPayment="onEditPayment"
     />
 
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import PaymentModal from "@/components/PaymentModal.vue";
 import { usePaymentMethodStore } from "@/stores/PaymentMethodStore.js";
-import { storeToRefs } from "pinia";
 
-const props = defineProps({
-    invoice: {
-        type: Object,
-        required: true
-    },
-})
+const props = defineProps({ paymentMethod: Object });
+const emit = defineEmits(['update:paymentMethod']);
 
 const paymentMethodStore = usePaymentMethodStore();
-const { paymentMethods } = storeToRefs(paymentMethodStore);
 
 const showAddPaymentModal = ref(false);
+const editingPayment = ref(null);
+
+const selectedPM = computed({
+    get: () => props.paymentMethod?.iban || "",
+    set: (iban) => {
+        const pm = paymentMethodStore.findPaymentMethodByIban(iban) || null;
+        emit('update:paymentMethod', pm);
+    }
+});
 
 function openAddPayment() {
     editingPayment.value = {
@@ -57,15 +70,33 @@ function openAddPayment() {
     showAddPaymentModal.value = true;
 }
 
-function onCreatePayment(payment) {
-    paymentMethods.value.push({ ...payment });
-    props.invoice.paymentMethod = { ...payment };
-    Object.keys(payment).forEach(key => payment[key] = '');
+function openEditPayment() {
+    editingPayment.value = props.paymentMethod;
+    showAddPaymentModal.value = true;
 }
 
-const editingPayment = ref(null);
-function openEditPayment() {
-    editingPayment.value = { ...props.invoice.paymentMethod };
-    showAddPaymentModal.value = true;
+function onCreatePayment(payment) {
+    const existing = paymentMethodStore.findPaymentMethodByIban(payment.iban);
+    if (existing) {
+        // New payment method with the same IBAN - update the existing one
+        paymentMethodStore.updatePaymentMethod(payment);
+    } else {
+        // New payment method - add it to the store
+        paymentMethodStore.addPaymentMethod(payment);
+    }
+    emit('update:paymentMethod', payment);
+}
+
+function onEditPayment(payment) {
+    const existing = paymentMethodStore.findPaymentMethodByIban(payment.iban);
+    if (existing) {
+        // Update existing payment method
+        paymentMethodStore.updatePaymentMethod(payment);
+    } else {
+        // iban changed - remove the old one and add the new one
+        paymentMethodStore.addPaymentMethod(payment);
+        paymentMethodStore.deletePaymentMethod(props.paymentMethod.iban);
+    }
+    emit('update:paymentMethod', payment);
 }
 </script>

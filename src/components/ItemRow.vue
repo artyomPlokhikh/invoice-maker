@@ -53,7 +53,7 @@ const props = defineProps({
 
 const emit = defineEmits(['remove', 'dragStart']);
 
-const priceInput = ref(String(props.item.price || props.defaultPrice.value));
+const priceInput = ref(String(props.item.price));
 
 const formatPriceOnBlur = () => {
     const value = parseFloat(priceInput.value.replace(',', '.')) || 0;
@@ -95,4 +95,14 @@ function onRemoveClick() {
 watch(() => props.item.quantity, (newVal) => {
     timeInput.value = formatTimeValue(newVal);
 });
+
+watch(
+    () => props.item.price,
+    (newVal) => {
+        priceInput.value = (newVal ?? 0).toLocaleString('cs-CZ', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+);
 </script>

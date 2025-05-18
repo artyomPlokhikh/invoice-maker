@@ -12,9 +12,7 @@
     </h2>
 
     <section class="bg-white p-6 rounded-xl shadow space-y-6">
-        <CustomerSection
-            :invoice="invoice"
-        />
+        <CustomerSection v-model:customer="invoice.customer"/>
 
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Popis</label>
@@ -44,9 +42,7 @@
         </div>
 
         <div class="space-y-2">
-            <PaymentSection
-                :invoice="invoice"
-            />
+            <PaymentSection v-model:paymentMethod="invoice.paymentMethod"/>
         </div>
 
         <div class="flex justify-center">
@@ -80,11 +76,7 @@
     </section>
 
     <section class="bg-white p-6 rounded-xl shadow space-y-4">
-        <ItemTable
-            :items="invoice.items"
-            @addItem="(item) => invoice.items.push(item)"
-            @removeItem="(index) => invoice.items.splice(index, 1)"
-        />
+        <ItemTable v-model:items="invoice.items"/>
     </section>
 
     <div class="flex justify-between items-center mt-8">
@@ -138,10 +130,9 @@ if (route.params.number) {
     if (found) {
         Object.assign(invoice, found);
         isEditing.value = true;
-    };
+    }
 }
 initInvoice.value = JSON.parse(JSON.stringify(invoice));
-//
 
 function createDefaultInvoice() {
     const uniqueNumber = invoiceStore.generateUniqueInvoiceNumber();
