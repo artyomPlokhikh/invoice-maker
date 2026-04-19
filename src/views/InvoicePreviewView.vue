@@ -41,7 +41,7 @@
 
         <section class="mt-8 text-sm flex gap-10">
             <span>Datum vystavení: <strong>{{ formatDate(invoice.issueDate) }}</strong></span>
-            <span>Datum splatnosti: <strong>{{ formatDate(invoice.dueDate) }}</strong></span>
+            <span v-if="invoice.dueDate">Datum splatnosti: <strong>{{ formatDate(invoice.dueDate) }}</strong></span>
         </section>
 
         <section class="mt-8 grid grid-cols-[auto_1fr]">
